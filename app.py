@@ -32,7 +32,7 @@ def get_conn():
     global _sample_loaded
     conn = p.connect()
     if not _sample_loaded and os.environ.get("AUTO_LOAD_SAMPLE"):
-        has_data = conn.execute("SELECT COUNT(*) c FROM raw_leads").fetchone()["c"] > 0
+        has_data = conn.execute("SELECT COUNT(*) c FROM leads").fetchone()["c"] > 0
         if not has_data:
             run_id = "AUTO" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
             conn.execute("INSERT OR IGNORE INTO runs VALUES(?,?,?,?,?,?)",
