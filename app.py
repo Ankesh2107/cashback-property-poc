@@ -26,8 +26,28 @@ UPLOAD_DIR = Path(__file__).resolve().parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
+_sample_loaded = False
+
 def get_conn():
+    global _sample_loaded
     conn = p.connect()
+    if not _sample_loaded and os.environ.get("AUTO_LOAD_SAMPLE"):
+        has_data = conn.execute("SELECT COUNT(*) c FROM raw_leads").fetchone()["c"] > 0
+        if not has_data:
+            run_id = "AUTO" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            conn.execute("INSERT OR IGNORE INTO runs VALUES(?,?,?,?,?,?)",
+                         (run_id, p.now(), None, "RUNNING", "auto-load", ""))
+            conn.commit()
+            p.import_leads(conn, run_id, str(p.LEADS_CSV))
+            p.build_leads(conn, run_id)
+            p.build_drafts(conn, run_id)
+            p.import_replies(conn, run_id, str(p.REPLIES_CSV), p.Faults([]))
+            p.build_leads(conn, run_id)
+            p.build_drafts(conn, run_id)
+            conn.execute("UPDATE runs SET finished_at=?, status='OK' WHERE run_id=?",
+                         (p.now(), run_id))
+            conn.commit()
+        _sample_loaded = True
     api_key = conn.execute("SELECT value FROM settings WHERE key='gemini_api_key'").fetchone()
     if api_key and api_key["value"] and not gemini_ai.is_configured():
         gemini_ai.configure(api_key["value"])

@@ -27,6 +27,15 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import db as dbmod
+
+DBError = sqlite3.OperationalError
+try:
+    import psycopg2
+    DBError = (sqlite3.OperationalError, psycopg2.OperationalError)
+except ImportError:
+    pass
+
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 OUT = Path(os.environ.get("CASHBACK_OUT", ROOT / "output"))
@@ -135,11 +144,7 @@ def now():
 
 
 def connect():
-    OUT.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, timeout=10)
-    conn.row_factory = sqlite3.Row
-    conn.executescript(SCHEMA)
-    return conn
+    return dbmod.connect()
 
 
 def audit(conn, run_id, action, etype, eid, detail=""):
@@ -193,7 +198,7 @@ class Faults:
     def maybe_fail_write(self, event_id):
         if self.flaky.get(event_id, 0) > 0:
             self.flaky[event_id] -= 1
-            raise sqlite3.OperationalError("simulated: destination unavailable")
+            raise sqlite3.OperationalError("simulated: destination unavailable")  # noqa: always sqlite3 for simulation
 
 
 def with_retry(fn, conn, run_id, label, attempts=3, base_delay=0.2):
@@ -201,7 +206,7 @@ def with_retry(fn, conn, run_id, label, attempts=3, base_delay=0.2):
     for i in range(1, attempts + 1):
         try:
             return fn()
-        except sqlite3.OperationalError as e:
+        except DBError as e:
             audit(conn, run_id, "RETRY", "write", label, f"attempt {i}/{attempts} failed: {e}")
             conn.commit()
             if i == attempts:
@@ -486,7 +491,7 @@ def import_replies(conn, run_id, path, faults):
         try:
             result = with_retry(lambda: apply_event(conn, run_id, r, faults), conn, run_id, r["event_id"])
             stats[result] += 1
-        except sqlite3.OperationalError as e:               # retries exhausted -> park it, keep going
+        except DBError as e:               # retries exhausted -> park it, keep going
             with conn:
                 dead_letter(conn, run_id, Path(path).name, n, f"destination failed after retries: {e}", r)
             stats["dead_letter"] += 1
