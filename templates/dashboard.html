@@ -224,6 +224,7 @@
 
 <div style="display:flex; gap:12px; margin-top:24px;">
   <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload More Data</a>
+  <a href="{{ url_for('report') }}?print=1" target="_blank" class="btn btn-outline">Export PDF Report</a>
   <form action="{{ url_for('reset_data') }}" method="post"
         onsubmit="return confirm('Clear all data? Suppression list and settings will be preserved.');">
     <button class="btn btn-outline" style="color:var(--danger);">Reset Data</button>

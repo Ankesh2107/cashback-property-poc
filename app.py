@@ -138,6 +138,15 @@ def dashboard():
                            cleaning=cr)
 
 
+@app.route("/report")
+def report():
+    conn = get_conn()
+    s = p.summary(conn)
+    cr = p.cleaning_report(conn) if s["raw_rows"] > 0 else None
+    return render_template("report.html", s=s, cleaning=cr,
+                           generated=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"))
+
+
 @app.route("/leads")
 def leads():
     conn = get_conn()

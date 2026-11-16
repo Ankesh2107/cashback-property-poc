@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cashback Property - Run Summary Report</title>
+<style>
+  body { font: 14px/1.5 system-ui, Arial, sans-serif; color: #1e293b; max-width: 800px; margin: 32px auto; padding: 0 24px; }
+  h1 { margin: 0 0 4px; font-size: 24px; }
+  h2 { margin: 28px 0 8px; font-size: 16px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+  .sub { color: #64748b; margin-bottom: 16px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+  th { background: #f1f5f9; }
+  td.n { text-align: right; font-weight: 600; width: 120px; }
+  .del { color: #b91c1c; text-decoration: line-through; }
+  .ok { color: #047857; font-weight: 600; }
+  .bar { position: fixed; top: 12px; right: 16px; }
+  .bar button { padding: 8px 16px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-size: 14px; cursor: pointer; }
+  @media print { .bar { display: none; } body { margin: 0; } }
+</style>
+</head>
+<body>
+<div class="bar"><button onclick="window.print()">Save as PDF</button></div>
+<h1>Cashback Property - Run Summary</h1>
+<div class="sub">Generated {{ generated }} &middot; sample data only, nothing is ever sent.</div>
+
+<h2>Lead pipeline</h2>
+<table>
+  <tr><td>Raw lead rows imported</td><td class="n">{{ s.raw_rows }}</td></tr>
+  <tr><td>Unique leads (after email dedupe)</td><td class="n">{{ s.unique_leads }} ({{ s.rows_merged_away }} merged away)</td></tr>
+  <tr><td>ELIGIBLE_FOR_DRAFT (draft-ready)</td><td class="n">{{ s.draft_ready }}</td></tr>
+  <tr><td>HOLD_REVIEW</td><td class="n">{{ s.held_for_review }}</td></tr>
+  <tr><td>SUPPRESSED</td><td class="n">{{ s.suppressed }}</td></tr>
+  <tr><td>INVALID</td><td class="n">{{ s.invalid }}</td></tr>
+  <tr><td>Drafts pending human review</td><td class="n">{{ s.drafts_pending_review }}</td></tr>
+  <tr><td>Drafts cancelled (lead later suppressed)</td><td class="n">{{ s.drafts_cancelled }}</td></tr>
+  <tr><td>Drafts actually sent</td><td class="n">{{ s.drafts_sent }}</td></tr>
+</table>
+
+<h2>Replies and tasks</h2>
+<table>
+  <tr><th>Category</th><th style="text-align:right">Count</th></tr>
+  {% for cat, cnt in s.replies_by_category.items() %}
+  <tr><td>{{ cat }}</td><td class="n">{{ cnt }}</td></tr>
+  {% endfor %}
+  <tr><td><b>Reply events stored</b></td><td class="n">{{ s.reply_events_stored }}</td></tr>
+  <tr><td><b>Open tasks</b></td><td class="n">{{ s.open_tasks }}</td></tr>
+  <tr><td>Persistent suppression list entries</td><td class="n">{{ s.suppression_list_size }}</td></tr>
+  <tr><td>Dead-letter rows (rejected input)</td><td class="n">{{ s.dead_letter_rows }}</td></tr>
+</table>
+
+{% if cleaning %}
+<h2>Data cleaning</h2>
+<table>
+  <tr><td>Emails fixed</td><td class="n">{{ cleaning.emails_fixed }}</td></tr>
+  <tr><td>Dates normalized</td><td class="n">{{ cleaning.dates_normalized }}</td></tr>
+  <tr><td>Roles normalized</td><td class="n">{{ cleaning.roles_normalized }}</td></tr>
+  <tr><td>Cities cleaned</td><td class="n">{{ cleaning.cities_cleaned }}</td></tr>
+  <tr><td>Names fixed</td><td class="n">{{ cleaning.names_cleaned }}</td></tr>
+  <tr><td>Duplicates merged</td><td class="n">{{ cleaning.duplicates_merged }}</td></tr>
+</table>
+{% endif %}
+
+<script>
+  if (location.search.indexOf('print=1') !== -1) window.addEventListener('load', function () { window.print(); });
+</script>
+</body>
+</html>
