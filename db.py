@@ -148,6 +148,9 @@ class PgCursor:
     def description(self):
         return self._cur.description
 
+    def __iter__(self):
+        return iter(self.fetchall())
+
     def fetchone(self):
         row = self._cur.fetchone()
         if row is None or self._cur.description is None:
