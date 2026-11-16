@@ -26,6 +26,8 @@ TABLE_PKS = {
 TABLE_COLS = {
     "lead_stage": ["lead_id", "stage", "last_event_id", "updated_at"],
     "settings": ["key", "value"],
+    "ai_content": ["id", "lead_id", "content_type", "subject", "body",
+                   "sample_incoming", "model", "created_at"],
 }
 
 SCHEMA_PG = """
@@ -74,7 +76,7 @@ CREATE TABLE IF NOT EXISTS ai_content (
 
 def _sqlite_to_pg(sql):
     """Translate SQLite-flavour SQL to PostgreSQL."""
-    s = sql.strip()
+    s = sql.strip().replace("%", "%%")
 
     # INSERT OR REPLACE → upsert
     m = re.match(r"INSERT\s+OR\s+REPLACE\s+INTO\s+(\w+)", s, re.I)
@@ -173,7 +175,7 @@ class PgConnection:
         pg_sql = _sqlite_to_pg(sql)
         cur = self._conn.cursor()
         try:
-            cur.execute(pg_sql, tuple(params) if params else None)
+            cur.execute(pg_sql, tuple(params) if params else ())
         except Exception as e:
             self._conn.rollback()
             raise

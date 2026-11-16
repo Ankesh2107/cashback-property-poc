@@ -540,7 +540,7 @@ def cleaning_report(conn):
     }
     raws = {r["lead_id"]: r for r in conn.execute("SELECT * FROM raw_leads").fetchall()}
     leads = {r["lead_id"]: r for r in conn.execute("SELECT * FROM leads").fetchall()}
-    members = conn.execute("SELECT master_lead_id, COUNT(*) c FROM lead_members GROUP BY master_lead_id HAVING c > 1").fetchall()
+    members = conn.execute("SELECT master_lead_id, COUNT(*) c FROM lead_members GROUP BY master_lead_id HAVING COUNT(*) > 1").fetchall()
     report["duplicates_merged"] = sum(m["c"] - 1 for m in members)
 
     for lid, lead in leads.items():
