@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>Pipeline summary &mdash; sample data only, nothing is ever sent.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="value">{{ stats.raw_rows }}</div><div class="label">Raw Rows</div></div>
+  <div class="stat primary"><div class="value">{{ stats.unique_leads }}</div><div class="label">Unique Leads</div></div>
+  <div class="stat success"><div class="value">{{ stats.draft_ready }}</div><div class="label">Draft Ready</div></div>
+  <div class="stat warning"><div class="value">{{ stats.held_for_review }}</div><div class="label">Held for Review</div></div>
+  <div class="stat danger"><div class="value">{{ stats.suppressed }}</div><div class="label">Suppressed</div></div>
+  <div class="stat"><div class="value">{{ stats.invalid }}</div><div class="label">Invalid</div></div>
+  <div class="stat primary"><div class="value">{{ stats.open_tasks }}</div><div class="label">Open Tasks</div></div>
+  <div class="stat success"><div class="value">{{ stats.drafts_sent }}</div><div class="label">Emails Sent</div></div>
+</div>
+
+{% if ai_configured %}
+<div class="card" style="background:var(--success-light); border-color:#a7f3d0;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-size:20px;">&#9889;</span>
+    <div>
+      <strong>Gemini AI Connected</strong>
+      <p style="font-size:13px; color:#065f46; margin-top:2px;">
+        AI-powered personalized emails and reply scenarios are active.
+        <a href="{{ url_for('leads') }}?status=ELIGIBLE_FOR_DRAFT">View draft-ready leads</a> to generate content.
+      </p>
+    </div>
+    <form action="{{ url_for('api_generate_all') }}" method="post" style="margin-left:auto;">
+      <button class="btn btn-success btn-sm" onclick="this.innerHTML='<span class=loading></span> Generating...';">
+        Generate All AI Drafts
+      </button>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="card" style="background:var(--warning-light); border-color:#fde68a;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-size:20px;">&#128273;</span>
+    <div>
+      <strong>Gemini AI Not Configured</strong>
+      <p style="font-size:13px; color:#92400e; margin-top:2px;">
+        Add a free Gemini API key in <a href="{{ url_for('settings') }}">Settings</a> to enable AI-powered emails.
+        Template-based drafts are active as fallback.
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Lead Status Stacked Progress Bar -->
+<div class="card">
+  <h3>Lead Status Breakdown</h3>
+  {% set total = stats.draft_ready + stats.held_for_review + stats.suppressed + stats.invalid %}
+  <div class="progress-bar-container" id="status-bar">
+    {% if total > 0 %}
+    <div class="progress-stacked">
+      {% for label, val, color, cls in [
+        ('Draft Ready', stats.draft_ready, 'var(--success)', 'seg-draft'),
+        ('Hold / Review', stats.held_for_review, 'var(--warning)', 'seg-hold'),
+        ('Suppressed', stats.suppressed, 'var(--danger)', 'seg-supp'),
+        ('Invalid', stats.invalid, '#94a3b8', 'seg-inv')
+      ] %}
+      {% if val > 0 %}
+      <div class="progress-segment {{ cls }}" style="width:{{ (val / total * 100) | round(1) }}%; background:{{ color }};"
+           title="{{ label }}: {{ val }} ({{ (val / total * 100) | round(1) }}%)">
+        {% if (val / total * 100) > 8 %}{{ val }}{% endif %}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <div class="progress-legend">
+      <span class="legend-item"><i style="background:var(--success);"></i> Draft Ready <b>{{ stats.draft_ready }}</b></span>
+      <span class="legend-item"><i style="background:var(--warning);"></i> Hold / Review <b>{{ stats.held_for_review }}</b></span>
+      <span class="legend-item"><i style="background:var(--danger);"></i> Suppressed <b>{{ stats.suppressed }}</b></span>
+      <span class="legend-item"><i style="background:#94a3b8;"></i> Invalid <b>{{ stats.invalid }}</b></span>
+    </div>
+    {% else %}
+    <p style="color:var(--muted); font-size:13px;">No leads loaded yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if cleaning %}
+<div class="card">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+    <h3 style="margin:0;">Data Cleaning Report</h3>
+    <span class="badge-status" style="background:var(--success-light); color:#065f46;">Auto-cleaned on import</span>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+    {% for label, val, icon in [
+      ('Names Fixed', cleaning.names_cleaned, '&#9998;'),
+      ('Emails Fixed', cleaning.emails_fixed, '&#9993;'),
+      ('Dates Normalized', cleaning.dates_normalized, '&#128197;'),
+      ('Roles Normalized', cleaning.roles_normalized, '&#128188;'),
+      ('Cities Cleaned', cleaning.cities_cleaned, '&#127961;'),
+      ('Duplicates Merged', cleaning.duplicates_merged, '&#128279;')
+    ] %}
+    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center;">
+      <div style="font-size:24px; font-weight:700; color:{% if val > 0 %}var(--primary){% else %}var(--muted){% endif %};">{{ val }}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if cleaning.examples %}
+  <details>
+    <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--primary); margin-bottom:8px;">
+      Show cleaning examples ({{ cleaning.examples | length }})
+    </summary>
+    <table style="font-size:12px;">
+      <thead><tr><th>Lead</th><th>Field</th><th>Raw (Before)</th><th>Cleaned (After)</th></tr></thead>
+      <tbody>
+      {% for ex in cleaning.examples %}
+      {% for field, before, after in ex.changes %}
+      <tr>
+        {% if loop.first %}<td rowspan="{{ ex.changes | length }}" style="vertical-align:top; font-weight:600;">
+          <a href="{{ url_for('lead_detail', lead_id=ex.lead_id) }}">{{ ex.lead_id }}</a> {{ ex.name }}
+        </td>{% endif %}
+        <td>{{ field }}</td>
+        <td style="color:var(--danger); text-decoration:line-through;">{{ before }}</td>
+        <td style="color:var(--success); font-weight:600;">{{ after }}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </details>
+  {% endif %}
+</div>
+{% endif %}
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+  <div class="card">
+    <h3>Leads by Status</h3>
+    <div class="bar-chart">
+      {% set max_val = [stats.draft_ready, stats.held_for_review, stats.suppressed, stats.invalid, 1] | max %}
+      {% for label, val, color in [
+        ('Draft Ready', stats.draft_ready, 'var(--success)'),
+        ('Hold / Review', stats.held_for_review, 'var(--warning)'),
+        ('Suppressed', stats.suppressed, 'var(--danger)'),
+        ('Invalid', stats.invalid, '#94a3b8')
+      ] %}
+      <div class="bar-row">
+        <span class="bar-label">{{ label }}</span>
+        <span class="bar-fill" style="width:{{ (val / max_val * 200) | int if max_val else 0 }}px; background:{{ color }};"></span>
+        <span class="bar-value">{{ val }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Replies by Category</h3>
+    <div class="bar-chart">
+      {% set rmax = stats.replies_by_category.values() | list | max if stats.replies_by_category else 1 %}
+      {% for cat, cnt in stats.replies_by_category.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ cat }}</span>
+        <span class="bar-fill" style="width:{{ (cnt / rmax * 200) | int }}px; background:var(--primary);"></span>
+        <span class="bar-value">{{ cnt }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  function refreshStats() {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(s => {
+        document.querySelectorAll('.stat .value').forEach(el => {
+          const label = el.parentElement.querySelector('.label').textContent.trim();
+          const map = {'Raw Rows': s.raw_rows, 'Unique Leads': s.unique_leads,
+                       'Draft Ready': s.draft_ready, 'Held for Review': s.held_for_review,
+                       'Suppressed': s.suppressed, 'Invalid': s.invalid,
+                       'Open Tasks': s.open_tasks, 'Emails Sent': s.drafts_sent};
+          if (label in map) el.textContent = map[label];
+        });
+        const total = s.draft_ready + s.held_for_review + s.suppressed + s.invalid;
+        if (total > 0) {
+          const bar = document.querySelector('.progress-stacked');
+          if (bar) {
+            const segs = [
+              {val: s.draft_ready, color: 'var(--success)', label: 'Draft Ready'},
+              {val: s.held_for_review, color: 'var(--warning)', label: 'Hold / Review'},
+              {val: s.suppressed, color: 'var(--danger)', label: 'Suppressed'},
+              {val: s.invalid, color: '#94a3b8', label: 'Invalid'}
+            ];
+            bar.innerHTML = segs.filter(x => x.val > 0).map(x => {
+              const pct = (x.val / total * 100).toFixed(1);
+              return '<div class="progress-segment" style="width:' + pct + '%; background:' + x.color + ';" title="' + x.label + ': ' + x.val + ' (' + pct + '%)">' + (parseFloat(pct) > 8 ? x.val : '') + '</div>';
+            }).join('');
+          }
+        }
+      }).catch(() => {});
+  }
+  setInterval(refreshStats, 5000);
+})();
+</script>
+
+<div class="card">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+    <h3 style="margin:0;">Recent Activity</h3>
+    <a href="{{ url_for('audit_log') }}" style="font-size:13px; margin-left:auto;">View full log</a>
+  </div>
+  <table>
+    <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>Detail</th></tr></thead>
+    <tbody>
+    {% for log in recent %}
+    <tr>
+      <td style="white-space:nowrap; font-size:12px;">{{ log.ts[:19] }}</td>
+      <td><span class="badge-status" style="background:#f1f5f9; color:#334155;">{{ log.action }}</span></td>
+      <td>{{ log.entity_type }} {{ log.entity_id }}</td>
+      <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--muted);">{{ log.detail }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="display:flex; gap:12px; margin-top:24px;">
+  <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload More Data</a>
+  <form action="{{ url_for('reset_data') }}" method="post"
+        onsubmit="return confirm('Clear all data? Suppression list and settings will be preserved.');">
+    <button class="btn btn-outline" style="color:var(--danger);">Reset Data</button>
+  </form>
+</div>
+{% endblock %}

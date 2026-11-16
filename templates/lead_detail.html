@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.lead_id }} - {{ lead.first_name }} {{ lead.last_name }}{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex; align-items:center; gap:16px;">
+  <div>
+    <a href="{{ url_for('leads') }}" style="font-size:13px; color:var(--muted);">&larr; All Leads</a>
+    <h1>{{ lead.first_name }} {{ lead.last_name }}</h1>
+    <p>{{ lead.lead_id }} &middot; {{ lead.company }}</p>
+  </div>
+  <span class="badge-status badge-{{ lead.status }}" style="font-size:14px; padding:6px 16px; margin-left:auto;">
+    {{ lead.status }}
+  </span>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+  <div class="card">
+    <h3>Lead Information</h3>
+    <dl class="info-grid">
+      <dt>Email</dt><dd>{{ lead.email_norm }}{% if not lead.email_valid %} <span style="color:var(--danger);">(invalid)</span>{% endif %}</dd>
+      <dt>Role</dt><dd>{{ lead.role_norm or 'N/A' }}</dd>
+      <dt>Segment</dt><dd>{{ lead.segment or 'None' }}</dd>
+      <dt>City</dt><dd>{{ lead.city_norm or 'N/A' }}</dd>
+      <dt>Source</dt><dd>{{ lead.source }}</dd>
+      <dt>Source Date</dt><dd>{{ lead.source_date or 'N/A' }}</dd>
+      <dt>Consent</dt><dd>{{ lead.consent_status }}</dd>
+      <dt>Stage</dt><dd>{{ stage.stage if stage else 'NEW' }}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3>Status Reasons</h3>
+    <p style="font-size:13px; color:var(--muted); line-height:1.8;">{{ lead.status_reasons }}</p>
+
+    {% if raw %}
+    {% set changes = [] %}
+    {% set raw_name = (raw.first_name or '') ~ ' ' ~ (raw.last_name or '') %}
+    {% set clean_name = lead.first_name ~ ' ' ~ lead.last_name %}
+    {% if raw_name.strip() != clean_name.strip() and raw_name.strip() %}{% set _ = changes.append(('Name', raw_name.strip(), clean_name.strip())) %}{% endif %}
+    {% set raw_email = (raw.email or '').strip() %}
+    {% if raw_email and raw_email.lower() != (lead.email_norm or '') %}{% set _ = changes.append(('Email', raw_email, lead.email_norm)) %}{% endif %}
+    {% set raw_city = (raw.city or '').strip() %}
+    {% if raw_city and raw_city != (lead.city_norm or '') %}{% set _ = changes.append(('City', raw_city, lead.city_norm)) %}{% endif %}
+    {% set raw_role = (raw.role or '').strip() %}
+    {% if raw_role and raw_role != (lead.role_norm or '') %}{% set _ = changes.append(('Role', raw_role, lead.role_norm)) %}{% endif %}
+    {% set raw_date = (raw.source_date or '').strip() %}
+    {% if raw_date and raw_date != (lead.source_date or '') %}{% set _ = changes.append(('Date', raw_date, lead.source_date)) %}{% endif %}
+
+    {% if changes %}
+    <h3 style="margin-top:16px;">Data Cleaning Applied</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Raw (Original)</th><th>Cleaned</th></tr></thead>
+      <tbody>
+      {% for field, before, after in changes %}
+      <tr>
+        <td style="font-weight:600;">{{ field }}</td>
+        <td style="color:var(--danger); text-decoration:line-through; font-size:12px;">{{ before }}</td>
+        <td style="color:var(--success); font-weight:600; font-size:12px;">{{ after }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="font-size:12px; color:var(--muted); margin-top:12px;">No cleaning changes needed for this lead.</p>
+    {% endif %}
+    {% endif %}
+
+    {% if members | length > 1 %}
+    <h3 style="margin-top:16px;">Merged Rows ({{ members | length }})</h3>
+    <table>
+      <thead><tr><th>Raw ID</th><th>Source</th><th>Master</th><th>Differences</th></tr></thead>
+      <tbody>
+      {% for m in members %}
+      <tr>
+        <td>{{ m.raw_lead_id }}</td><td>{{ m.source }}</td>
+        <td>{% if m.is_master %}Yes{% endif %}</td>
+        <td style="font-size:12px; color:var(--muted);">{{ m.differences }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+
+{% if lead.status == 'ELIGIBLE_FOR_DRAFT' %}
+<!-- OUTREACH EMAIL DRAFT -->
+<div class="card">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+    <h3 style="margin:0;">Outreach Email Draft</h3>
+    {% if ai_draft and ai_draft.get('template') %}
+    <span class="badge-status" style="background:#f1f5f9; color:#475569;">Template</span>
+    {% elif ai_draft and ai_draft.get('cached') %}
+    <span class="badge-status" style="background:var(--success-light); color:#065f46;">AI Generated</span>
+    {% else %}
+    <span class="badge-status" style="background:var(--primary-light); color:#1e40af;">AI Fresh</span>
+    {% endif %}
+    <button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="regenerateDraft('{{ lead.lead_id }}')">
+      &#x21bb; Regenerate with AI
+    </button>
+  </div>
+  <div class="email-preview" id="outreach-preview">
+    {% if ai_draft %}
+    <div class="subject">Subject: {{ ai_draft.subject }}</div>
+    <pre>{{ ai_draft.body }}</pre>
+    {% else %}
+    <p style="color:var(--muted);">No draft generated yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- REPLY SCENARIOS -->
+<div class="card">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+    <h3 style="margin:0;">Reply Scenarios</h3>
+    <p style="font-size:13px; color:var(--muted); margin:0;">
+      Click each category to see what we&rsquo;d reply if they respond this way.
+    </p>
+    <button class="btn btn-sm btn-success" style="margin-left:auto;" onclick="generateAllScenarios('{{ lead.lead_id }}')" id="genAllBtn">
+      &#9889; Generate All with AI
+    </button>
+  </div>
+
+  <div id="scenarios">
+  {% for cat in all_categories %}
+  <div class="scenario-card">
+    <div class="scenario-header" onclick="toggleScenario(this)">
+      <span class="badge-status badge-{{ cat }}">{{ cat }}</span>
+      <span style="font-size:13px; color:var(--muted);">
+        {% if cat == 'INTERESTED' %}They want to meet
+        {% elif cat == 'QUESTION' %}They have questions
+        {% elif cat == 'NOT_NOW' %}Not the right time
+        {% elif cat == 'OUT_OF_OFFICE' %}Away / on leave
+        {% elif cat == 'WRONG_PERSON' %}Wrong contact
+        {% elif cat == 'UNSUBSCRIBE' %}Wants removal
+        {% elif cat == 'NEEDS_REVIEW' %}Unclear / needs human review
+        {% endif %}
+      </span>
+      {% if cat in scenarios %}
+      <span class="badge-status" style="background:var(--success-light); color:#065f46; font-size:11px;">Ready</span>
+      {% endif %}
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="scenario-body" id="scenario-{{ cat }}">
+      {% if cat in scenarios %}
+      <div class="scenario-incoming">
+        <strong>Their reply:</strong>
+        &ldquo;{{ scenarios[cat].sample_incoming }}&rdquo;
+      </div>
+      <div class="email-preview">
+        <div class="subject">Our response &mdash; Subject: {{ scenarios[cat].subject }}</div>
+        <pre>{{ scenarios[cat].body }}</pre>
+      </div>
+      {% else %}
+      <p style="color:var(--muted); font-size:13px;">
+        Click &ldquo;Generate All with AI&rdquo; above to create personalized reply drafts.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if draft %}
+<div class="card">
+  <h3>Template Draft (Pipeline)</h3>
+  <dl class="info-grid" style="margin-bottom:12px;">
+    <dt>Draft ID</dt><dd>{{ draft.draft_id }}</dd>
+    <dt>Approval</dt><dd><span class="badge-status" style="background:{% if draft.approval_state=='PENDING_REVIEW' %}var(--warning-light){% elif draft.approval_state=='CANCELLED' %}var(--danger-light){% else %}#f1f5f9{% endif %}; color:var(--text);">{{ draft.approval_state }}</span></dd>
+    <dt>Send State</dt><dd>{{ draft.send_state }}</dd>
+  </dl>
+  <div class="email-preview">
+    <div class="subject">Subject: {{ draft.subject }}</div>
+    <pre>{{ draft.body }}</pre>
+  </div>
+</div>
+{% endif %}
+
+{% if events %}
+<div class="card">
+  <h3>Reply Events</h3>
+  <table>
+    <thead><tr><th>Event ID</th><th>Category</th><th>Reply Text</th></tr></thead>
+    <tbody>
+    {% for e in events %}
+    <tr>
+      <td>{{ e.event_id }}</td>
+      <td><span class="badge-status badge-{{ e.category }}">{{ e.category }}</span></td>
+      <td style="font-size:13px;">{{ e.reply_text }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if tasks %}
+<div class="card">
+  <h3>Tasks</h3>
+  <table>
+    <thead><tr><th>Task ID</th><th>Type</th><th>Title</th><th>Status</th><th>Due</th></tr></thead>
+    <tbody>
+    {% for t in tasks %}
+    <tr>
+      <td>{{ t.task_id }}</td>
+      <td>{{ t.task_type }}</td>
+      <td>{{ t.title }}</td>
+      <td><span class="badge-status" style="background:{% if t.status=='OPEN' %}var(--success-light){% else %}#f1f5f9{% endif %}; color:var(--text);">{{ t.status }}</span></td>
+      <td>{{ t.due_date }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+function toggleScenario(el) {
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+
+async function regenerateDraft(leadId) {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> Generating...';
+  try {
+    const resp = await fetch('/api/generate-draft/' + leadId, {method: 'POST'});
+    const data = await resp.json();
+    const preview = document.getElementById('outreach-preview');
+    preview.innerHTML = '<div class="subject">Subject: ' + escHtml(data.subject) + '</div><pre>' + escHtml(data.body) + '</pre>';
+    btn.innerHTML = '&#x21bb; Regenerate with AI';
+  } catch(e) {
+    btn.innerHTML = 'Error - try again';
+  }
+  btn.disabled = false;
+}
+
+async function generateAllScenarios(leadId) {
+  const btn = document.getElementById('genAllBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> Generating all scenarios...';
+  try {
+    const resp = await fetch('/api/generate-scenarios/' + leadId, {method: 'POST'});
+    const data = await resp.json();
+    for (const [cat, info] of Object.entries(data)) {
+      const el = document.getElementById('scenario-' + cat);
+      if (el && info) {
+        el.innerHTML =
+          '<div class="scenario-incoming"><strong>Their reply:</strong> &ldquo;' +
+          escHtml(info.sample_incoming || '') + '&rdquo;</div>' +
+          '<div class="email-preview"><div class="subject">Our response &mdash; Subject: ' +
+          escHtml(info.subject) + '</div><pre>' + escHtml(info.body) + '</pre></div>';
+      }
+    }
+    btn.innerHTML = '&#9889; Regenerate All';
+  } catch(e) {
+    btn.innerHTML = 'Error - try again';
+  }
+  btn.disabled = false;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+{% endblock %}

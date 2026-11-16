@@ -1,0 +1,27 @@
+event_id,lead_id,reply_text
+E001,L001,"Thanks, interested. Can you share some times next week?"
+E002,L004,Please remove me from your list.
+E003,L008,Not interested at this stage.
+E004,L010,I am away until Monday.
+E005,L012,What is the cashback model and how does it work?
+E005,L012,What is the cashback model and how does it work?
+E006,L014,Wrong person; contact our director instead.
+E007,L016,"Yes, happy to discuss a referral partnership."
+E008,L017,Could you send a short overview?
+E009,L018,Please unsubscribe me immediately.
+E010,L020,Happy to have a quick call next Thursday.
+E011,L022,"I'm not responsible for partnerships, please contact the manager."
+E012,L025,Out of office until next week.
+E013,L028,Maybe later this quarter.
+E014,L031,Can you explain your referral structure?
+E015,L034,Stop emailing this address.
+E016,L040,"Yes, let's speak."
+E017,L044,I need to check with my colleague.
+E018,L050,Wrong department.
+E019,L055,No thanks.
+E020,L062,I would like more information.
+E021,L067,Please contact me in January.
+E022,L073,We can schedule a meeting.
+E022,L073,We can schedule a meeting.
+E023,L080,Automatic reply: away on annual leave.
+E024,L085,Remove my contact details.

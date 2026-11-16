@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Reply Events - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Reply Events &amp; Tasks</h1>
+  <p>Simulated replies classified by category, with follow-up tasks.</p>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+  <div class="stat-grid" style="margin:0;">
+    <div class="stat primary"><div class="value">{{ events | length }}</div><div class="label">Events</div></div>
+    <div class="stat success"><div class="value">{{ tasks | selectattr('status', 'equalto', 'OPEN') | list | length }}</div><div class="label">Open Tasks</div></div>
+  </div>
+</div>
+
+<div class="card" style="padding:0; overflow-x:auto;">
+  <table>
+    <thead>
+      <tr><th>Event ID</th><th>Lead</th><th>Name</th><th>Category</th><th>Reply Text</th></tr>
+    </thead>
+    <tbody>
+    {% for e in events %}
+    <tr>
+      <td><strong>{{ e.event_id }}</strong></td>
+      <td>
+        {% if e.master_lead_id %}
+        <a href="{{ url_for('lead_detail', lead_id=e.master_lead_id) }}">{{ e.master_lead_id }}</a>
+        {% else %}{{ e.lead_id }}{% endif %}
+      </td>
+      <td>{{ e.first_name or '' }} {{ e.last_name or '' }}</td>
+      <td><span class="badge-status badge-{{ e.category }}">{{ e.category }}</span></td>
+      <td style="max-width:400px; font-size:13px;">{{ e.reply_text }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if tasks %}
+<div class="card" style="padding:0; overflow-x:auto; margin-top:16px;">
+  <div style="padding:16px 16px 0;"><h3>Tasks</h3></div>
+  <table>
+    <thead>
+      <tr><th>Task ID</th><th>Event</th><th>Lead</th><th>Type</th><th>Title</th><th>Status</th><th>Due</th></tr>
+    </thead>
+    <tbody>
+    {% for t in tasks %}
+    <tr>
+      <td>{{ t.task_id }}</td>
+      <td>{{ t.event_id }}</td>
+      <td><a href="{{ url_for('lead_detail', lead_id=t.lead_id) }}">{{ t.lead_id }}</a></td>
+      <td>{{ t.task_type }}</td>
+      <td style="font-size:13px;">{{ t.title }}</td>
+      <td>
+        <span class="badge-status" style="background:{% if t.status=='OPEN' %}var(--success-light); color:#065f46{% elif 'CANCEL' in t.status %}var(--danger-light); color:#991b1b{% else %}#f1f5f9; color:#475569{% endif %};">
+          {{ t.status }}
+        </span>
+      </td>
+      <td>{{ t.due_date }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Draft Queue - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Draft Queue</h1>
+  <p>Personalized outreach emails awaiting human review. Nothing is ever sent automatically.</p>
+</div>
+
+{% if ai_configured %}
+<div class="card" style="background:var(--success-light); border-color:#a7f3d0; padding:12px 16px;">
+  <span style="font-size:13px; color:#065f46;">
+    &#9889; Gemini AI is active. Click any lead to view AI-personalized drafts and reply scenarios.
+  </span>
+</div>
+{% endif %}
+
+<div class="card" style="padding:0; overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>Draft ID</th><th>Lead</th><th>Name</th><th>Company</th><th>Segment</th>
+        <th>To</th><th>Subject</th><th>Approval</th><th>Send State</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for d in drafts %}
+    <tr style="cursor:pointer;" onclick="location.href='{{ url_for('lead_detail', lead_id=d.lead_id) }}'">
+      <td><strong>{{ d.draft_id }}</strong></td>
+      <td>{{ d.lead_id }}</td>
+      <td>{{ d.first_name }} {{ d.last_name }}</td>
+      <td>{{ d.company }}</td>
+      <td>{{ d.segment or '-' }}</td>
+      <td style="font-size:12px;">{{ d.to_email }}</td>
+      <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.subject }}</td>
+      <td>
+        <span class="badge-status" style="background:{% if d.approval_state=='PENDING_REVIEW' %}var(--warning-light); color:#92400e{% elif d.approval_state=='CANCELLED' %}var(--danger-light); color:#991b1b{% else %}#f1f5f9; color:#475569{% endif %};">
+          {{ d.approval_state }}
+        </span>
+      </td>
+      <td>{{ d.send_state }}</td>
+    </tr>
+    {% endfor %}
+    {% if not drafts %}
+    <tr><td colspan="9" style="text-align:center; padding:32px; color:var(--muted);">
+      No drafts yet. Upload leads to generate drafts.
+    </td></tr>
+    {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

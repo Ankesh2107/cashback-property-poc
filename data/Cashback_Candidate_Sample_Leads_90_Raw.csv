@@ -1,0 +1,91 @@
+lead_id,first_name,last_name,company,email,role,city,source,source_date,consent_status,suppressed,notes
+L001,Anita,Rao,Harbour Mortgage,anita@harbour.example,Mortgage Broker,Brisbane,partner_directory,01-10-2026,documented,no,
+L002,Anita ,Rao,Harbour Mortgage, ANITA@HARBOUR.EXAMPLE ,Mortgage Broker,Brisbane,partner_directory,01-10-2026,documented,no,
+L003,Ben,Lee,North Accountants,ben@north.example,Accountant,Sydney,purchased_list,03-10-2026,unknown,no,
+L004,Clara,Singh,Pacific Planning,clara@pacific.example,Financial Planner,Melbourne,event_opt_in,02-10-2026,documented,no,
+L005,Dan,Morris,Coastal Finance,dan@coastal.example,Mortgage Broker,Gold Coast,referral_form,05-10-2026,documented,yes,
+L006,Eve,Chen,Urban Lending,eve@urban.example,Mortgage Broker,Perth,partner_directory,06-10-2026,review_required,no,
+L007,Finn,Taylor,Alpha Accounting,bad-email,Accountant,Adelaide,event_opt_in,07-10-2026,documented,no,
+L008,Grace,Patel,Vista Finance,grace@vista.example,Mortgage Broker,Brisbane,referral_form,08-10-2026,documented,no,
+L009,Hugo,White,Harbour Legal,hugo@harbourlegal.example,Solicitor,Sydney,partner_directory,09-10-2026,documented,no,
+L010,Ivy,Kaur,Bright Planning,ivy@bright.example,Financial Planner,Canberra,event_opt_in,10-10-2026,documented,no,
+L011,Jack,Brown,Delta Lending,jack@delta.example,Mortgage Broker,Brisbane,purchased_list,11-10-2026,unknown,no,
+L012,Kim,Ng,Metro Brokers,kim@metro.example,Mortgage Broker,Melbourne,referral_form,12-10-2026,documented,no,
+L013,Liam,Jones,Atlas Advice,liam@atlas.example,Financial Planner,Hobart,event_opt_in,13-10-2026,documented,no,
+L014,Mia,Shah,Sunrise Accounting,mia@sunrise.example,Accountant,Perth,partner_directory,14-10-2026,documented,no,
+L015,Noah,Reed,Bridge Lending,noah@bridge.example,Mortgage Broker,Sydney,referral_form,15-10-2026,documented,no,
+L016,Olivia,Wong,Horizon Advisory,olivia@horizon.example,Financial Planner,Brisbane,event_opt_in,16-10-2026,documented,no,
+L017,Paul,Davis,Beacon Brokers,paul@beacon.example,Mortgage Broker,Darwin,partner_directory,17-10-2026,documented,no,
+L018,Quinn,Fox,Civic Accounting,quinn@civic.example,Accountant,Sydney,referral_form,18-10-2026,documented,no,
+L019,Ria,Mehta,Summit Finance,ria@summit.example,Mortgage Broker,Melbourne,event_opt_in,19-10-2026,documented,no,
+L020,Sam,Green,Vertex Advice,sam@vertex.example,Financial Planner,Brisbane,partner_directory,20-10-2026,documented,no,
+L021,Henry,Taylor,Coastal Partners,henry.taylor21@example.com,Buyer Agent,Canberra,event_opt_in,09-10-2026,documented,no,
+L022,Henry,Thomas,Metro Finance,  HENRY.THOMAS22@EXAMPLE.COM  ,,SYDNEY,partner_directory,05-10-2026,unknown,no,
+L023,Noah,Thomas,Metro Finance,noah.thomas23@example.com,ACCOUNTANT,Sydney,purchased_list,26-10-2026,unknown,no,
+L024,Jack,Patel,Metro Advisory,jack.patel24@example.com,financial planner,Sydney,manual_entry,24-10-2026,review_required,no,
+L025,Zoe,Thomas,Metro Finance,zoe.thomas25@example.com,Real Estate Agent,Sydney,event_opt_in,04-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L026,Noah,Thomas,North Advisory,not-an-email,Financial Planner,,partner_directory,01-10-2026,review_required,no,
+L027,Ava,Martin,North Property,ava.martin27@example.com,Financial Planner,Melbourne,website_enquiry,04-10-2026,documented,no,
+L028,Oliver,Kaur,Summit Advisory,oliver.kaur28@example.com,Mortgage Broker,Brisbane,conference,03-10-2026,documented,yes,
+L029,Noah,Wilson,Summit Partners,noah.wilson29@example.com,Real Estate Agent,Canberra,conference,01-10-2026,documented,no,
+L030,Aarav,Singh,Pacific Finance,aarav.singh30@example.com,Real Estate Agent,Brisbane,purchased_list,24-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L031,Mia,Singh,Coastal Property,mia.singh31@example.com,Financial Planner,,website_enquiry,28-10-2026,documented,no,
+L032,Mia,Brown,Metro Property,mia.brown32@example.com,Buyer Agent,brisbane ,website_enquiry,26-10-2026,review_required,no,
+L033,Liam,Wilson,Metro Advisory,  LIAM.WILSON33@EXAMPLE.COM  ,mortgage broker,Adelaide,public_listing,13-10-2026,unknown,no,
+L034,Arjun,Martin,Summit Finance,,financial planner,Perth,manual_entry,18-10-2026,review_required,no,
+L035,Sophie,Brown,Summit Advisory,sophie.brown35@example.com,Mortgage Broker,Sydney,event_opt_in,08-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L036,Ruby,Martin,North Finance, ANITA@HARBOUR.EXAMPLE ,,Perth,event_opt_in,13-10-2026,documented,no,Duplicate of L001/L002; uppercase and whitespace
+L037,Mia,Chen,Coastal Property,mia.chen37@example.com,,brisbane ,conference,12-10-2026,unknown,no,
+L038,Lucas,Taylor,Metro Advisory,mia.chen37@example.com,Mortgage Broker,Melbourne,event_opt_in,17-10-2026,unknown,no,
+L039,Rohan,Singh,Harbour Partners,not-an-email,Financial Planner,Perth,website_enquiry,22-10-2026,documented,no,
+L040,Henry,Sharma,Summit Advisory,henry.sharma40@example.com,mortgage broker,Sydney,event_opt_in,28-10-2026,review_required,no,Sample fictional record; deliberately mixed quality
+L041,Lucas,Martin,Summit Property,lucas.martin41@example.com,,Perth,website_enquiry,04-10-2026,review_required,no,
+L042,Rohan,Chen,Summit Advisory,rohan.chen42@example.com,,SYDNEY,website_enquiry,10-10-2026,unknown,yes,
+L043,Oliver,Brown,Summit Finance,oliver.brown43@example.com,Real Estate Agent,,website_enquiry,27-10-2026,unknown,no,
+L044,Ruby,Patel,North Partners,  RUBY.PATEL44@EXAMPLE.COM  ,Buyer Agent,,website_enquiry,06-10-2026,documented,no,
+L045,Isla,Patel,Coastal Property,isla.patel45@example.com,Buyer Agent,Melbourne,event_opt_in,01-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L046,Jack,Williams,North Finance,jack.williams46@example.com,financial planner,Canberra,purchased_list,25-10-2026,unknown,no,
+L047,Rohan,Thomas,Harbour Partners,rohan.thomas47@example.com,Buyer Agent,,website_enquiry,17-10-2026,unknown,no,
+L048,Sophie,Chen,Metro Finance,sophie.chen48@example.com,Accountant,Perth,public_listing,12-10-2026,unknown,no,
+L049,Sophie,Sharma,Harbour Partners,clara@pacific.example,Real Estate Agent,Sydney,partner_directory,10-10-2026,documented,no,Duplicate of L004; must remain suppressed after E002
+L050,Henry,Wilson,Metro Property,henry.wilson50@example.com,Broker,Gold Coast,manual_entry,17-10-2026,review_required,no,Sample fictional record; deliberately mixed quality
+L051,Sophie,Wilson,North Advisory,,Accountant,SYDNEY,purchased_list,06-10-2026,documented,no,
+L052,Lucas,Nguyen,North Partners,not-an-email,Accountant,Gold Coast,partner_directory,11-10-2026,documented,no,
+L053,Aarav,Brown,Harbour Advisory,aarav.brown53@example.com,Mortgage Broker,Adelaide,website_enquiry,17-10-2026,documented,no,
+L054,Lucas,Taylor,Coastal Property,lucas.taylor54@example.com,Financial Planner,SYDNEY,manual_entry,22-10-2026,documented,no,
+L055,Lucas,Singh,Coastal Advisory,  LUCAS.SINGH55@EXAMPLE.COM  ,,Perth,public_listing,26-10-2026,review_required,no,Sample fictional record; deliberately mixed quality
+L056,Aarav,Sharma,Metro Partners,aarav.sharma56@example.com,Broker,Adelaide,partner_directory,10-10-2026,unknown,yes,
+L057,Lucas,Sharma,Harbour Partners,aarav.sharma56@example.com,mortgage broker,,purchased_list,10-10-2026,documented,no,
+L058,Noah,Kaur,North Advisory,noah.kaur58@example.com,Broker,Gold Coast,public_listing,26-10-2026,documented,no,
+L059,Isla,Martin,Harbour Advisory,isla.martin59@example.com,Real Estate Agent,Brisbane,website_enquiry,10-10-2026,unknown,no,
+L060,Ava,Taylor,Summit Finance,broken@@example.com,Mortgage Broker,Canberra,event_opt_in,19-10-2026,documented,no,Sample fictional record; deliberately mixed quality
+L061,Ruby,Chen,Metro Property,ruby.chen61@example.com,,SYDNEY,partner_directory,22-10-2026,documented,no,
+L062,Oliver,Williams,Harbour Partners,oliver.williams62@example.com,Accountant,SYDNEY,manual_entry,14-10-2026,documented,no,
+L063,Henry,Sharma,Coastal Finance,henry.sharma63@example.com,Mortgage Broker,Canberra,event_opt_in,13-10-2026,unknown,no,
+L064,Henry,Taylor,Metro Finance,henry.taylor64@example.com,Real Estate Agent,Canberra,event_opt_in,23-10-2026,review_required,no,
+L065,Rohan,Nguyen,Metro Partners,not-an-email,mortgage broker,Adelaide,event_opt_in,16-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L066,Ella,Thomas,Pacific Advisory,  ELLA.THOMAS66@EXAMPLE.COM  ,Accountant,Brisbane,event_opt_in,27-10-2026,unknown,no,
+L067,Oliver,Wilson,Pacific Advisory,oliver.wilson67@example.com,mortgage broker,Melbourne,manual_entry,09-10-2026,review_required,no,
+L068,Noah,Nguyen,Summit Finance,,ACCOUNTANT,Sydney,public_listing,03-10-2026,documented,no,
+L069,Ruby,Thomas,Metro Advisory,ruby.thomas69@example.com,Accountant,Sydney,purchased_list,07-10-2026,unknown,no,
+L070,Lucas,Taylor,North Finance,lucas.taylor70@example.com,Buyer Agent,Melbourne,partner_directory,24-10-2026,unknown,yes,Sample fictional record; deliberately mixed quality
+L071,Oliver,Nguyen,Pacific Partners,oliver.nguyen71@example.com,Real Estate Agent,SYDNEY,purchased_list,07-10-2026,unknown,no,
+L072,Grace,Wilson,Summit Partners,grace.wilson72@example.com,ACCOUNTANT,SYDNEY,public_listing,16-10-2026,documented,no,
+L073,Zoe,Kaur,Pacific Finance,zoe.kaur73@example.com,,Brisbane,manual_entry,15-10-2026,review_required,no,
+L074,Noah,Sharma,Pacific Property,noah.sharma74@example.com,financial planner,Gold Coast,website_enquiry,08-10-2026,documented,no,
+L075,Oliver,Taylor,North Partners,oliver.taylor75@example.com,Accountant,Adelaide,partner_directory,28-10-2026,unknown,no,Sample fictional record; deliberately mixed quality
+L076,Amelia,Taylor,Metro Property,oliver.taylor75@example.com,Buyer Agent,,partner_directory,14-10-2026,unknown,no,
+L077,Oliver,Martin,Metro Finance,  OLIVER.MARTIN77@EXAMPLE.COM  ,Broker,,website_enquiry,14-10-2026,unknown,no,
+L078,Noah,Kaur,Harbour Property,not-an-email,Financial Planner,,public_listing,08-10-2026,documented,no,
+L079,Ethan,Kaur,Pacific Property,ethan.kaur79@example.com,ACCOUNTANT,SYDNEY,manual_entry,10-10-2026,documented,no,
+L080,Lucas,Kaur,Pacific Partners,lucas.kaur80@example.com,Mortgage Broker,Melbourne,website_enquiry,28-10-2026,review_required,no,Sample fictional record; deliberately mixed quality
+L081,Ava,Singh,Coastal Property,ava.singh81@example.com,Financial Planner,Brisbane,partner_directory,28-10-2026,review_required,no,
+L082,Ella,Patel,Summit Partners,ella.patel82@example.com,Broker,Melbourne,public_listing,22-10-2026,documented,no,
+L083,Ruby,Chen,Harbour Advisory,ruby.chen83@example.com,Financial Planner,SYDNEY,website_enquiry,17-10-2026,documented,no,
+L084,Aarav,Wilson,Harbour Finance,aarav.wilson84@example.com,Buyer Agent,Gold Coast,event_opt_in,26-10-2026,review_required,yes,
+L085,Ava,Williams,Summit Partners,,Mortgage Broker,Adelaide,public_listing,11-10-2026,review_required,no,Sample fictional record; deliberately mixed quality
+L086,Zoe,Brown,Harbour Finance,zoe.brown86@example.com,Accountant,brisbane ,public_listing,18-10-2026,unknown,no,
+L087,Henry,Patel,Pacific Finance,henry.patel87@example.com,Accountant,Canberra,conference,23-10-2026,documented,no,
+L088,Ava,Thomas,Metro Property,  AVA.THOMAS88@EXAMPLE.COM  ,Broker,Brisbane,event_opt_in,18-10-2026,documented,no,
+L089,Mia,Wilson,Coastal Advisory,mia.wilson89@example.com,Financial Planner,Melbourne,website_enquiry,04-10-2026,unknown,no,
+L090,Henry,Nguyen,Pacific Finance,henry.nguyen90@example.com,Financial Planner,Canberra,partner_directory,01-10-2026,documented,no,Sample fictional record; deliberately mixed quality

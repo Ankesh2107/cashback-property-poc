@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Settings - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Settings</h1>
+  <p>Configure the Gemini AI integration for personalized email generation.</p>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <h3>Gemini API Key</h3>
+  <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+    Get a free API key from
+    <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>.
+    The free tier (gemini-3.1-flash-lite) supports 30 requests/minute &mdash; plenty for this PoC.
+  </p>
+
+  <form action="{{ url_for('settings') }}" method="post">
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">API Key</label>
+      <input type="password" name="gemini_api_key" placeholder="AIza..."
+             style="width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px;
+                    font-size:14px; font-family:monospace;"
+             value="{{ masked_key }}">
+    </div>
+    {% if ai_configured %}
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:13px; color:#065f46;">
+      <span style="font-size:16px;">&#10003;</span> Connected and verified
+    </div>
+    {% endif %}
+    <div style="display:flex; gap:8px;">
+      <button type="submit" class="btn btn-primary">Save &amp; Verify</button>
+      {% if masked_key %}
+      <button type="submit" class="btn btn-outline" onclick="this.form.gemini_api_key.value='';">Remove Key</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <h3>How it works</h3>
+  <div style="font-size:13px; color:var(--muted); line-height:1.8;">
+    <p><strong>With API key:</strong> Gemini 3.1 Flash Lite generates personalized outreach emails
+    and reply scenarios tailored to each lead's name, company, role and city.</p>
+    <p style="margin-top:8px;"><strong>Without API key:</strong> The system uses template-based drafts
+    with placeholders. These still include the correct name/company but are less personalized.</p>
+    <p style="margin-top:8px;"><strong>Caching:</strong> AI-generated content is cached in the database.
+    Click "Regenerate" on any lead to get fresh content.</p>
+  </div>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <h3>What the AI generates</h3>
+  <table style="font-size:13px;">
+    <tr><td style="font-weight:600; padding-right:16px;">Outreach emails</td>
+        <td>Personalized cold outreach mentioning their company, role, and a meeting CTA</td></tr>
+    <tr><td style="font-weight:600; padding-right:16px;">Reply scenarios</td>
+        <td>For each of 7 reply types (Interested, Question, Not Now, etc.), a realistic
+            sample incoming reply and our personalized response</td></tr>
+  </table>
+</div>
+{% endblock %}

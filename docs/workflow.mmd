@@ -1,0 +1,26 @@
+flowchart TD
+    T["Trigger: CLI / cron / webhook"] --> A[Import leads CSV → raw_leads]
+    A -->|missing header or file| CFG[Run FAILED, audit logged, exit non-zero]
+    A -->|row missing lead_id| DL[(dead_letter)]
+    A --> B[Normalise: trim, lowercase email, name/role/city labels, ISO dates]
+    B --> C[Validate email syntax]
+    C --> D[Dedupe by normalised email<br/>earliest lead_id is master, provenance kept in lead_members]
+    D --> E{Gates, strictest wins}
+    E -->|suppressed flag or on suppression list| S[SUPPRESSED]
+    E -->|bad / missing email| I[INVALID]
+    E -->|consent not documented, purchased_list, role outside 3 segments| H[HOLD_REVIEW]
+    E -->|all pass| OK[ELIGIBLE_FOR_DRAFT]
+    OK --> G[Template draft: subject + body + 15-min CTA + opt-out placeholder]
+    G --> Q[(drafts: PENDING_REVIEW / NOT_SENT)]
+    R[Import replies CSV] -->|missing field| DL
+    R --> X{event_id already stored?}
+    X -->|yes| DUP[Ignore + audit DUPLICATE_EVENT_IGNORED]
+    X -->|no| K[Classify with ordered rules]
+    K -->|write fails| RT[Retry x3 with backoff] -->|still failing| DL
+    K --> U[UNSUBSCRIBE → suppression_list, lead SUPPRESSED, draft CANCELLED, open tasks cancelled]
+    K --> N[INTERESTED → FOLLOW_UP task, stage up]
+    K --> P[QUESTION → DRAFT_RESPONSE task, never a send]
+    K --> M[NOT_NOW / OUT_OF_OFFICE / WRONG_PERSON / NEEDS_REVIEW → stage or review only]
+    U --> Q
+    Q --> REP[Exports + summary_report.md + dashboard.html]
+    ALL[(audit_log: every step)] -.- A

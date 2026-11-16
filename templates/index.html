@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Cashback Property - Get Started{% endblock %}
+{% block content %}
+<div style="max-width:640px; margin:80px auto; text-align:center;">
+  <h1 style="font-size:32px; margin-bottom:8px;">Cashback Property</h1>
+  <p style="color:var(--muted); font-size:16px; margin-bottom:40px;">
+    Technical Automation PoC &mdash; Import leads, generate personalized outreach, and manage reply workflows.
+  </p>
+  <div class="card" style="text-align:left;">
+    <h3>Get started</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">
+      Upload your leads CSV to begin. The system will clean, deduplicate, segment, and generate
+      personalized email drafts with AI.
+    </p>
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+      <label class="upload-zone" id="dropzone">
+        <h3>Drop CSV files here or click to browse</h3>
+        <p>Accepts leads CSV and/or replies CSV</p>
+        <input type="file" name="csvfiles" accept=".csv" multiple id="fileInput">
+      </label>
+      <div id="fileList" style="margin-top:12px; font-size:13px; color:var(--muted);"></div>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px; width:100%; justify-content:center;">
+        Process &amp; Import
+      </button>
+    </form>
+  </div>
+  <div class="card" style="text-align:left;">
+    <h3>Or load sample data</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:12px;">
+      Use the provided 90-lead + 25-reply test datasets to see the system in action.
+    </p>
+    <form action="{{ url_for('load_sample') }}" method="post">
+      <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center;">
+        Load Sample Data
+      </button>
+    </form>
+  </div>
+</div>
+<script>
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('fileInput');
+const fl = document.getElementById('fileList');
+fi.addEventListener('change', () => {
+  fl.innerHTML = Array.from(fi.files).map(f => f.name).join(', ');
+});
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--primary)'; });
+dz.addEventListener('dragleave', () => { dz.style.borderColor=''; });
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.style.borderColor='';
+  fi.files = e.dataTransfer.files;
+  fl.innerHTML = Array.from(fi.files).map(f => f.name).join(', ');
+});
+</script>
+{% endblock %}

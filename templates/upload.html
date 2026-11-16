@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Upload Data - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Upload Data</h1>
+  <p>Import leads or reply CSVs. The system auto-detects the file type from column headers.</p>
+</div>
+
+<div class="card" style="max-width:640px;">
+  <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+    <label class="upload-zone" id="dropzone">
+      <h3>Drop CSV files here or click to browse</h3>
+      <p>Leads CSV (lead_id, email, ...) and/or Replies CSV (event_id, reply_text, ...)</p>
+      <input type="file" name="csvfiles" accept=".csv" multiple id="fileInput">
+    </label>
+    <div id="fileList" style="margin-top:12px; font-size:13px; color:var(--muted);"></div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px;">
+      Process &amp; Import
+    </button>
+  </form>
+</div>
+
+<div class="card" style="max-width:640px;">
+  <h3>Expected CSV formats</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; font-size:13px;">
+    <div>
+      <strong>Leads CSV columns:</strong>
+      <ul style="margin-top:6px; padding-left:18px; color:var(--muted);">
+        <li>lead_id</li><li>first_name, last_name</li><li>company</li>
+        <li>email</li><li>role</li><li>city</li><li>source, source_date</li>
+        <li>consent_status</li><li>suppressed</li><li>notes</li>
+      </ul>
+    </div>
+    <div>
+      <strong>Replies CSV columns:</strong>
+      <ul style="margin-top:6px; padding-left:18px; color:var(--muted);">
+        <li>event_id</li><li>lead_id</li><li>reply_text</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('fileInput');
+const fl = document.getElementById('fileList');
+fi.addEventListener('change', () => {
+  fl.innerHTML = Array.from(fi.files).map(f => f.name).join(', ');
+});
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--primary)'; });
+dz.addEventListener('dragleave', () => { dz.style.borderColor=''; });
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.style.borderColor='';
+  fi.files = e.dataTransfer.files;
+  fl.innerHTML = Array.from(fi.files).map(f => f.name).join(', ');
+});
+</script>
+{% endblock %}

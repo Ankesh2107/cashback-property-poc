@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Leads - Cashback Property{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Leads</h1>
+  <p>{{ counts.get('all', 0) }} unique leads after deduplication and normalization.</p>
+</div>
+
+<div class="tabs">
+  {% for st, label in [('all','All'), ('ELIGIBLE_FOR_DRAFT','Draft Ready'), ('HOLD_REVIEW','Hold'),
+                        ('SUPPRESSED','Suppressed'), ('INVALID','Invalid')] %}
+  <a href="{{ url_for('leads', status=st) }}"
+     class="tab {% if current_filter == st %}active{% endif %}">
+    {{ label }}<span class="count">({{ counts.get(st, 0) }})</span>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="card" style="padding:0; overflow-x:auto;">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Company</th><th>Role</th><th>City</th>
+        <th>Email</th><th>Status</th><th>Stage</th><th>Merged</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for lead in leads %}
+    <tr style="cursor:pointer;" onclick="location.href='{{ url_for('lead_detail', lead_id=lead.lead_id) }}'">
+      <td><strong>{{ lead.lead_id }}</strong></td>
+      <td>{{ lead.first_name }} {{ lead.last_name }}</td>
+      <td>{{ lead.company }}</td>
+      <td>{{ lead.role_norm or '-' }}</td>
+      <td>{{ lead.city_norm or '-' }}</td>
+      <td style="font-size:12px; color:var(--muted);">{{ lead.email_norm if lead.email_valid else lead.email_norm + ' (invalid)' }}</td>
+      <td><span class="badge-status badge-{{ lead.status }}">{{ lead.status }}</span></td>
+      <td>{{ lead.stage }}</td>
+      <td>{% if lead.merged_count > 1 %}{{ lead.merged_count }} rows{% endif %}</td>
+    </tr>
+    {% endfor %}
+    {% if not leads %}
+    <tr><td colspan="9" style="text-align:center; padding:32px; color:var(--muted);">
+      No leads found. <a href="{{ url_for('upload') }}">Upload a CSV</a> to get started.
+    </td></tr>
+    {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
