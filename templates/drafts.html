@@ -19,7 +19,7 @@
     <thead>
       <tr>
         <th>Draft ID</th><th>Lead</th><th>Name</th><th>Company</th><th>Segment</th>
-        <th>To</th><th>Subject</th><th>Approval</th><th>Send State</th>
+        <th>To</th><th>Subject</th><th>Source</th><th>Approval</th><th>Send State</th>
       </tr>
     </thead>
     <tbody>
@@ -31,7 +31,11 @@
       <td>{{ d.company }}</td>
       <td>{{ d.segment or '-' }}</td>
       <td style="font-size:12px;">{{ d.to_email }}</td>
-      <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.subject }}</td>
+      <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.ai_subject or d.subject }}</td>
+      <td>
+        {% if d.ai_subject %}<span class="badge-status" style="background:var(--success-light); color:#065f46;">AI</span>
+        {% else %}<span class="badge-status" style="background:#f1f5f9; color:#475569;">Template</span>{% endif %}
+      </td>
       <td>
         <span class="badge-status" style="background:{% if d.approval_state=='PENDING_REVIEW' %}var(--warning-light); color:#92400e{% elif d.approval_state=='CANCELLED' %}var(--danger-light); color:#991b1b{% else %}#f1f5f9; color:#475569{% endif %};">
           {{ d.approval_state }}
@@ -41,7 +45,7 @@
     </tr>
     {% endfor %}
     {% if not drafts %}
-    <tr><td colspan="9" style="text-align:center; padding:32px; color:var(--muted);">
+    <tr><td colspan="10" style="text-align:center; padding:32px; color:var(--muted);">
       No drafts yet. Upload leads to generate drafts.
     </td></tr>
     {% endif %}

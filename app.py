@@ -282,8 +282,10 @@ def api_stats():
 def drafts():
     conn = get_conn()
     rows = conn.execute(
-        "SELECT d.*, l.first_name, l.last_name, l.company, l.role_norm, l.city_norm, l.segment "
-        "FROM drafts d JOIN leads l USING(lead_id) ORDER BY d.draft_id"
+        "SELECT d.*, l.first_name, l.last_name, l.company, l.role_norm, l.city_norm, l.segment, "
+        "a.subject AS ai_subject "
+        "FROM drafts d JOIN leads l USING(lead_id) "
+        "LEFT JOIN ai_content a ON a.id = d.lead_id || ':outreach' ORDER BY d.draft_id"
     ).fetchall()
     return render_template("drafts.html", drafts=rows, ai_configured=gemini_ai.is_configured())
 
