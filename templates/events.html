@@ -13,10 +13,15 @@
   </div>
 </div>
 
+<div style="margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+  <button class="btn btn-success btn-sm" id="genAllResp" onclick="genAllResp()">&#9889; Generate all category responses</button>
+  <span id="genAllStatus" style="font-size:13px; color:var(--muted);">Each reply gets a response written for its category. Nothing is sent.</span>
+</div>
+
 <div class="card" style="padding:0; overflow-x:auto;">
   <table>
     <thead>
-      <tr><th>Event ID</th><th>Lead</th><th>Name</th><th>Category</th><th>Reply Text</th></tr>
+      <tr><th>Event ID</th><th>Lead</th><th>Name</th><th>Category</th><th>Reply Text</th><th style="min-width:340px;">Suggested response (by category)</th></tr>
     </thead>
     <tbody>
     {% for e in events %}
@@ -29,7 +34,17 @@
       </td>
       <td>{{ e.first_name or '' }} {{ e.last_name or '' }}</td>
       <td><span class="badge-status badge-{{ e.category }}">{{ e.category }}</span></td>
-      <td style="max-width:400px; font-size:13px;">{{ e.reply_text }}</td>
+      <td style="max-width:300px; font-size:13px;">{{ e.reply_text }}</td>
+      <td style="font-size:12px;" id="resp-{{ e.event_id }}">
+        {% if not e.master_lead_id %}<span style="color:var(--muted);">Unknown lead - needs human review</span>
+        {% else %}
+        {% if e.resp_body %}
+        <details><summary style="cursor:pointer; font-weight:600;">{{ e.resp_subject }}</summary><pre style="white-space:pre-wrap; margin:6px 0 0; font:inherit;">{{ e.resp_body }}</pre></details>
+        {% else %}
+        <button class="btn btn-sm btn-outline gen-resp" data-event="{{ e.event_id }}" onclick="genResp('{{ e.event_id }}', this)">Generate</button>
+        {% endif %}
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
     </tbody>
@@ -63,4 +78,38 @@
   </table>
 </div>
 {% endif %}
+
+<script>
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+async function genResp(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+  try {
+    const r = await fetch('/api/generate-event-response/' + id, {method: 'POST'});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'failed');
+    const tag = d.template ? ' <span class="badge-status" style="background:#f1f5f9;color:#475569;">Template</span>' : '';
+    document.getElementById('resp-' + id).innerHTML =
+      '<details open><summary style="cursor:pointer;font-weight:600;">' + esc(d.subject) + tag + '</summary>' +
+      '<pre style="white-space:pre-wrap;margin:6px 0 0;font:inherit;">' + esc(d.body) + '</pre></details>';
+    return true;
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+    return false;
+  }
+}
+async function genAllResp() {
+  const btns = Array.from(document.querySelectorAll('.gen-resp'));
+  const all = document.getElementById('genAllResp'), st = document.getElementById('genAllStatus');
+  all.disabled = true;
+  let done = 0;
+  for (const b of btns) {
+    st.textContent = 'Generating ' + (done + 1) + ' of ' + btns.length + '...';
+    await genResp(b.dataset.event, b);
+    done++;
+    await new Promise(r => setTimeout(r, 2200));
+  }
+  st.textContent = 'Done: ' + done + ' responses generated.';
+  all.disabled = false;
+}
+</script>
 {% endblock %}

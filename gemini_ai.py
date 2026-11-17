@@ -245,6 +245,62 @@ Return ONLY valid JSON: {{"sample_incoming": "what they said", "subject": "respo
     return _template_reply(lead, category, sample_reply)
 
 
+def generate_event_response(event, lead, conn=None):
+    """Draft a response to one real reply, driven by its category and actual text."""
+    category = event["category"]
+    cache_key = f"{event['event_id']}:event_response"
+    if conn:
+        cached = conn.execute("SELECT subject, body FROM ai_content WHERE id=?", (cache_key,)).fetchone()
+        if cached:
+            return {"subject": cached["subject"], "body": cached["body"], "cached": True, "category": category}
+
+    cat_info = next((c for c in REPLY_CATEGORIES if c[0] == category), None)
+    guidance = cat_info[2] if cat_info else "Acknowledge politely and flag for human review"
+    reply_text = event["reply_text"]
+    fallback = _template_reply(lead, category, reply_text)
+
+    if not is_configured():
+        fallback["template"] = True
+        return fallback
+
+    prompt = f"""You are replying on behalf of Cashback Property (Australian company) to a real reply from a prospect.
+
+Prospect:
+- Name: {lead['first_name']} {lead['last_name']}
+- Company: {lead['company']}
+- Role: {lead.get('role_norm', '')}
+- City: {lead.get('city_norm', '')}
+
+Our original outreach proposed a referral partnership and a 15-minute introductory meeting.
+Their reply was classified as: {category}
+Their exact reply: "{reply_text}"
+Guidance for this category: {guidance}
+
+Write our response email (subject + body). Rules:
+- Respond to what they actually said; use their first name
+- Professional, warm Australian tone, body under 110 words
+- For UNSUBSCRIBE: confirm removal only, no sales pitch
+- For INTERESTED: propose a 15-minute meeting, do not invent specific times
+- For QUESTION: answer only in general terms, no commission rates or guaranteed returns
+- Never invent facts, shared connections or income claims
+- Sign off with: "Kind regards,\\n{{{{SENDER_NAME}}}}\\nCashback Property"
+
+Return ONLY valid JSON: {{"subject": "response subject", "body": "response body"}}"""
+
+    try:
+        data = _parse_json(_call_api(prompt))
+        if data and "subject" in data and "body" in data:
+            if conn:
+                _cache(conn, cache_key, lead["lead_id"], "event_response",
+                       data["subject"], data["body"], reply_text)
+            return {"subject": data["subject"], "body": data["body"], "cached": False, "category": category}
+        print(f"[Gemini event {event['event_id']}] JSON parse failed", file=sys.stderr)
+    except Exception as e:
+        print(f"[Gemini event {event['event_id']}] ERROR: {e}", file=sys.stderr)
+    fallback["template"] = True
+    return fallback
+
+
 def generate_all_scenarios(lead, conn=None):
     results = {}
     for cat, _, _ in REPLY_CATEGORIES:

@@ -258,6 +258,19 @@ def api_generate_scenarios(lead_id):
     return jsonify(results)
 
 
+@app.route("/api/generate-event-response/<event_id>", methods=["POST"])
+def api_generate_event_response(event_id):
+    conn = get_conn()
+    event = conn.execute("SELECT * FROM events WHERE event_id=?", (event_id,)).fetchone()
+    if not event or not event["master_lead_id"]:
+        return jsonify({"error": "Event or lead not found"}), 404
+    lead = conn.execute("SELECT * FROM leads WHERE lead_id=?", (event["master_lead_id"],)).fetchone()
+    if request.args.get("force"):
+        conn.execute("DELETE FROM ai_content WHERE id=?", (f"{event_id}:event_response",))
+        conn.commit()
+    return jsonify(gemini_ai.generate_event_response(lead_dict(event), lead_dict(lead), conn))
+
+
 @app.route("/api/generate-all", methods=["POST"])
 def api_generate_all():
     conn = get_conn()
@@ -294,8 +307,10 @@ def drafts():
 def events_page():
     conn = get_conn()
     rows = conn.execute(
-        "SELECT e.*, l.first_name, l.last_name, l.company "
-        "FROM events e LEFT JOIN leads l ON e.master_lead_id=l.lead_id ORDER BY e.event_id"
+        "SELECT e.*, l.first_name, l.last_name, l.company, "
+        "a.subject AS resp_subject, a.body AS resp_body "
+        "FROM events e LEFT JOIN leads l ON e.master_lead_id=l.lead_id "
+        "LEFT JOIN ai_content a ON a.id = e.event_id || ':event_response' ORDER BY e.event_id"
     ).fetchall()
     tasks = conn.execute("SELECT * FROM tasks ORDER BY task_id").fetchall()
     return render_template("events.html", events=rows, tasks=tasks)
